@@ -10,7 +10,26 @@ export const learningStateRouter = createTRPCRouter({
     return ctx.prisma.example.findMany();
   }),
 
-  newStage: protectedProcedure.mutation(async ({ ctx }) => {
+  getSessionState: protectedProcedure.query(async ({ ctx }) => {
+    // get the associated learning state
+    let state = await ctx.prisma.learningState.findFirst({
+      where: { userId: ctx.session.user.id },
+    });
+
+    // if there is no state, create one
+    if(!state) {
+      state = await ctx.prisma.learningState.create({
+        data: {
+          userId: ctx.session.user.id,
+        },
+      });
+    }
+
+    return state;
+  }),
+
+  newStage: protectedProcedure
+  .mutation(async ({ ctx }) => {
     // get the associated learning state
     let state = await ctx.prisma.learningState.findFirst({
       where: { userId: ctx.session.user.id },
