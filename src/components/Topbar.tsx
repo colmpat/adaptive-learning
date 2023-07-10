@@ -1,8 +1,12 @@
-import React from "react";
+import { Dispatch, SetStateAction } from "react";
 
-const Topbar: React.FC = () => {
+const Topbar: React.FC<{ 
+  chat: boolean,
+  setChat: Dispatch<SetStateAction<boolean>>
+}> = ({ chat, setChat }) => {
   const handleMenuClick = () => {
     // Add your logic here for handling menu click
+    setChat(!chat);
   };
 
   const handleProfileClick = () => {
@@ -14,7 +18,7 @@ const Topbar: React.FC = () => {
   };
 
   return (
-    <div className="w-screen h-16 bg-canvas fixed top-0 flex items-center justify-between px-4 border-b border-fgPrimary">
+    <div className="w-screen h-16 bg-canvas flex items-center justify-between px-4 border-b border-borderDefault">
       <div className="flex items-center">
         <button
           className="text-gray-800 hover:text-gray-600 focus:outline-none mr-4 p-1 rounded-md border border-fgPrimary"

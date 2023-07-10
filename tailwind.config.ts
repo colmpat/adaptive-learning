@@ -8,7 +8,8 @@ export default {
         canvas: '#f6f8fa',
         fgDefault: '#24292f',
         fgMuted: '#57606a',
-        fgSubtle: '#6e7781'
+        fgSubtle: '#6e7781',
+        borderDefault: "#d0d7de",
       },
     },
   },
