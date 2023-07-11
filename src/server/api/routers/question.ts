@@ -2,14 +2,30 @@ import { z } from "zod";
 import { Stage } from "@prisma/client";
 import {
   createTRPCRouter,
-  publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
 
 export const questionRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.question.findMany();
+  getAllForCurrentStage: protectedProcedure.query(async ({ ctx }) => {
+    const learningState = await ctx.prisma.learningState.findFirst({
+      where: {
+        userId: ctx.session.user.id,
+      },
+    });
+    if(!learningState) {
+      return [];
+    }
+
+    return ctx.prisma.question.findMany({
+      where: {
+        stage: {
+          equals: learningState.stage,
+        },
+      },
+    });
   }),
+
+
 
   markAsSeen: protectedProcedure.input(z.object({
     id: z.string(),

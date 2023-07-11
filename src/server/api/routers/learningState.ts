@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { Stage } from "@prisma/client";
 import {
   createTRPCRouter,
@@ -27,6 +28,36 @@ export const learningStateRouter = createTRPCRouter({
 
     return state;
   }),
+
+  answerQuestion: protectedProcedure
+    .input(
+      z.object({
+        questionId: z.string(),
+        correct: z.boolean(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // get the associated learning state
+      let state = await ctx.prisma.learningState.findFirst({
+        where: { userId: ctx.session.user.id },
+      });
+      if(!state) {
+        return 
+      }
+
+      // update the state
+      // -> increment questions asked
+      // -> if correct, increment correct answers and correct streak
+      await ctx.prisma.learningState.update({
+        where: { id: state.id },
+        data: {
+          questionsAsked: state.questionsAsked + 1,
+          correctAnswers: state.correctAnswers + (input.correct ? 1 : 0),
+          correctStreak: input.correct ? state.correctStreak + 1 : 0,
+          incorrectStreak: input.correct ? 0 : state.incorrectStreak + 1,
+        },
+      });
+    }),
 
   newStage: protectedProcedure
   .mutation(async ({ ctx }) => {
