@@ -1,6 +1,6 @@
 import { api } from "~/utils/api";
 
-const StageSummary: React.FC<{ nextStage: () => void}> = ({ nextStage }) => {
+const StageSummary: React.FC<{ nextStage: () => void }> = ({ nextStage }) => {
   const { data: learningState } = api.learningState.getSessionState.useQuery();
 
   return (
@@ -17,9 +17,7 @@ const StageSummary: React.FC<{ nextStage: () => void}> = ({ nextStage }) => {
         </h2>
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => {
-            nextStage()
-          }}
+          onClick={nextStage}
         >
           Proceed to next stage
         </button>

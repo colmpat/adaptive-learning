@@ -43,15 +43,18 @@ export const questionRouter = createTRPCRouter({
   }),
 
   getFirstUnseen: protectedProcedure.query(async ({ ctx }) => {
-    let sessionLearningState = await ctx.prisma.learningState.findFirst({
+    const sessionLearningState = await ctx.prisma.learningState.findFirst({
       where: { userId: ctx.session.user.id },
     });
+    if(!sessionLearningState) {
+      return null;
+    }
 
     // get first question in the current stage that the user has not seen
     const unseen = await ctx.prisma.question.findFirst({
       where: {
         stage: {
-          equals: sessionLearningState!.stage,  // we know this exists because of the protectedProcedure decorator
+          equals: sessionLearningState.stage,  // we know this exists because of the protectedProcedure decorator
         },
         questionShown: {
           none: {

@@ -1,16 +1,9 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Main from "~/components/Main";
-import Stage from "~/components/Stage";
-import { api } from "~/utils/api";
 
 export default function Home() {
   const { data: sessionData } = useSession();
-
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined },
-  );
 
   return (
     <>

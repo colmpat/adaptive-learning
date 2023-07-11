@@ -38,7 +38,7 @@ export const learningStateRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // get the associated learning state
-      let state = await ctx.prisma.learningState.findFirst({
+      const state = await ctx.prisma.learningState.findFirst({
         where: { userId: ctx.session.user.id },
       });
       if(!state) {

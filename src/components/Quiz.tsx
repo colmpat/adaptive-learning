@@ -9,9 +9,10 @@ const Quiz: React.FC = () => {
   const { mutateAsync: updateLearningStage } = api.learningState.newStage.useMutation();
   const { val: currentQuestion, next: nextQuestion } = useIterator(questions);
 
-  const nextStage = async () => {
-    await updateLearningStage();
-    await refetchQuestions();
+  const nextStage = () => {
+    void updateLearningStage().then(() => {
+      void refetchQuestions();
+    });
   };
 
   return (

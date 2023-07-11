@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Stage from "./Stage";
 
 const Chat: React.FC = () => {
   const [prompt, setPrompt] = useState<string>("");
