@@ -17,18 +17,13 @@ import { useState, useEffect, useCallback } from "react";
   * console.log(val); // undefined
   * next();
   */
-const useIterator = <T>(items: T[] | undefined): { val: T | undefined, next: () => void } => {
+const useIterator = <T>(items: T[] | undefined): { val: T | undefined, next: () => void, resetIter: () => void } => {
   const [index, setIndex] = useState<number>(0);
   const [val, setVal] = useState<T | undefined>(undefined);
 
   const next = useCallback(() => {
     setIndex((i) => Math.min(i + 1, items?.length || 0));
   }, [items?.length]);
-
-  // Reset the index when the items change
-  useEffect(() => {
-    setIndex(0);
-  }, [items]);
 
   // Update the current item when the index changes or the items change
   useEffect(() => {
@@ -39,7 +34,7 @@ const useIterator = <T>(items: T[] | undefined): { val: T | undefined, next: () 
     }
   }, [index, items]);
 
-  return { val, next};
+  return { val, next, resetIter: () => setIndex(0)};
 }
 
 export default useIterator;

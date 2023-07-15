@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Stage } from "@prisma/client";
+import { LearningState, Stage } from "@prisma/client";
 import {
   createTRPCRouter,
   publicProcedure,
@@ -59,8 +59,11 @@ export const learningStateRouter = createTRPCRouter({
       });
     }),
 
-  newStage: protectedProcedure
-  .mutation(async ({ ctx }) => {
+  clearState: protectedProcedure
+  .input(z.object({
+    nextStage: z.boolean().optional(),
+  }))
+  .mutation(async ({ ctx, input }) => {
     // get the associated learning state
     let state = await ctx.prisma.learningState.findFirst({
       where: { userId: ctx.session.user.id },
@@ -75,18 +78,23 @@ export const learningStateRouter = createTRPCRouter({
       });
     }
 
+    const data: Partial<LearningState> = {
+      correctAnswers: 0,
+      questionsAsked: 0,
+      correctStreak: 0,
+      incorrectStreak: 0,
+    }
+
+    if(input.nextStage) {
+      data.stage = getNextStage(state.stage);
+    }
+
     // update the state
     // -> move to next stage
     // -> reset answer data
     await ctx.prisma.learningState.update({
       where: { id: state.id },
-      data: {
-        stage: getNextStage(state.stage),
-        correctAnswers: 0,
-        questionsAsked: 0,
-        correctStreak: 0,
-        incorrectStreak: 0,
-      },
+      data: data,
     });
   }),
 });

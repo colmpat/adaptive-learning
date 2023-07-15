@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { shuffle } from "lodash";
 import { Stage } from "@prisma/client";
 import {
   createTRPCRouter,
@@ -16,16 +17,16 @@ export const questionRouter = createTRPCRouter({
       return [];
     }
 
-    return ctx.prisma.question.findMany({
+    const questions = await ctx.prisma.question.findMany({
       where: {
         stage: {
           equals: learningState.stage,
         },
       },
     });
+
+   return shuffle(questions);
   }),
-
-
 
   markAsSeen: protectedProcedure.input(z.object({
     id: z.string(),

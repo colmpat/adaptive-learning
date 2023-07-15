@@ -19,7 +19,7 @@ const StageSummary: React.FC<{ nextStage: () => void }> = ({ nextStage }) => {
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           onClick={nextStage}
         >
-          Proceed to next stage
+          Next Set of Questions
         </button>
       </div>
     </div>
