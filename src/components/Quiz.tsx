@@ -3,19 +3,21 @@ import { api } from "~/utils/api";
 import Question from "~/components/Question";
 import useIterator from "~/hooks/useIterator";
 import StageSummary from "./StageSummary";
+import { SetStateAction } from "react";
 
-const Quiz: React.FC = () => {
+const Quiz: React.FC<{ setChat: React.Dispatch<SetStateAction<boolean>> }>= ({ setChat }) => {
   const { data: questions, refetch: refetchQuestions } = api.question.getAllForCurrentStage.useQuery();
-  const { mutateAsync: updateLearningStage } = api.learningState.clearState.useMutation();
+  const { mutateAsync: updateLearningStage } = api.learningState.nextStage.useMutation();
   const { val: currentQuestion, next: nextQuestion, resetIter } = useIterator(questions);
-  const { data: learningState } = api.learningState.getSessionState.useQuery();
 
 
-  const nextStage = () => {
-    const passed = learningState?.correctAnswers === learningState?.questionsAsked
-    void updateLearningStage({ nextStage: passed }).then(() => {
-      void refetchQuestions();
-    });
+  const nextStage = async () => {
+    const proceeding = await updateLearningStage()
+    if(!proceeding) {
+      setChat(true);
+    }
+
+    await refetchQuestions();
     resetIter();
   };
 

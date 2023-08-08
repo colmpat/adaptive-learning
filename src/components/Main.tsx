@@ -9,7 +9,7 @@ const Main: React.FC = () => {
   return (
     <main className="w-screen min-h-screen flex flex-col">
       <Topbar chat={chat} setChat={setChat} />
-      { chat ? <Chat /> : <Quiz /> }
+      { chat ? <Chat setChat={setChat} /> : <Quiz setChat={setChat} /> }
     </main>
   );
 };

@@ -68,6 +68,7 @@ model LearningState {
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   stage           Stage @default(REMEMBER)
+  stageAttempts   Int   @default(0)
   correctAnswers  Int   @default(0)
   questionsAsked  Int   @default(0)
   correctStreak   Int   @default(0)
@@ -91,6 +92,7 @@ model Question {
   question      String
   answers       String[]
   correctAnswer Int
+  images        String[]
 
   questionShown User[] @relation("seenQuestion")  // users who have seen this question
   answerShown   User[] @relation("seenAnswer")    // users who have seen the answer to this question

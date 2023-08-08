@@ -59,47 +59,50 @@ export const learningStateRouter = createTRPCRouter({
       });
     }),
 
-  clearState: protectedProcedure
-  .input(z.object({
-    nextStage: z.boolean().optional(),
-  }))
-  .mutation(async ({ ctx, input }) => {
-    // get the associated learning state
-    let state = await ctx.prisma.learningState.findFirst({
-      where: { userId: ctx.session.user.id },
-    });
-
-    // if there is no state, create one
-    if(!state) {
-      state = await ctx.prisma.learningState.create({
-        data: {
-          userId: ctx.session.user.id,
-        },
+    nextStage: protectedProcedure.mutation(async ({ ctx }) => {
+      // get the associated learning state
+      let state = await ctx.prisma.learningState.findFirst({
+        where: { userId: ctx.session.user.id },
       });
-    }
 
-    const data: Partial<LearningState> = {
-      correctAnswers: 0,
-      questionsAsked: 0,
-      correctStreak: 0,
-      incorrectStreak: 0,
-    }
+      // if there is no state, create one
+      if(!state) {
+        state = await ctx.prisma.learningState.create({
+          data: {
+            userId: ctx.session.user.id,
+          },
+        });
+      }
 
-    if(input.nextStage) {
-      data.stage = getNextStage(state.stage);
-    }
+      const data: Partial<LearningState> = {
+        correctAnswers: 0,
+        questionsAsked: 0,
+        correctStreak: 0,
+        incorrectStreak: 0,
+      }
 
-    // update the state
-    // -> move to next stage
-    // -> reset answer data
-    await ctx.prisma.learningState.update({
-      where: { id: state.id },
-      data: data,
-    });
-  }),
+      const proceeding = proceedingToNextStage(state);
+
+      if(proceeding) {
+        data.stage = getNextStage(state.stage);
+        data.stageAttempts = 0;
+      } else {
+        data.stageAttempts = state.stageAttempts + 1;
+      }
+
+      // update the state
+      // -> move to next stage
+      // -> reset answer data
+      await ctx.prisma.learningState.update({
+        where: { id: state.id },
+        data: data,
+      });
+
+      return proceeding;
+    }),
 });
 
-export const getNextStage = (stage: Stage): Stage => {
+const getNextStage = (stage: Stage): Stage => {
     switch(stage) {
       case Stage.REMEMBER:
         return Stage.UNDERSTAND;
@@ -114,4 +117,15 @@ export const getNextStage = (stage: Stage): Stage => {
       default: // ie. CREATE -> DONE or DONE -> DONE
         return Stage.DONE;
     }
+}
+
+/**
+ * Returns true if the user can proceed to the next stage. At this point, we are simply checking that they have
+ * answered 4/5 questions correctly.
+ *
+ * @param state - the current learning state
+ * @returns true if the user can proceed to the next stage
+ */
+const proceedingToNextStage = (state: LearningState): boolean => {
+  return state.correctAnswers / state.questionsAsked >= 0.8;
 }
